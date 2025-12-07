@@ -12,11 +12,17 @@ import os
 # Add the src directory to the path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Initialize colorama for Windows terminal colors
+from colorama import init, Fore, Back, Style
+init(autoreset=True)
+
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.prompt import Prompt, Confirm
 from rich import box
+from rich.text import Text
+from rich.style import Style as RichStyle
 
 from utils import (
     get_current_weather,
@@ -30,19 +36,52 @@ from utils import (
 
 console = Console()
 
+# Weather-themed color styles
+SUNNY_STYLE = "bold yellow"
+RAINY_STYLE = "bold blue"
+CLOUDY_STYLE = "dim white"
+COLD_STYLE = "bold cyan"
+HOT_STYLE = "bold red"
+
+
+def get_temp_style(temp: float) -> str:
+    """Get a color style based on temperature."""
+    if temp <= 0:
+        return COLD_STYLE
+    elif temp <= 10:
+        return "cyan"
+    elif temp <= 20:
+        return "green"
+    elif temp <= 30:
+        return "yellow"
+    else:
+        return HOT_STYLE
+
+
+def show_welcome_banner():
+    """Display a colorful welcome banner."""
+    banner = """
+[bold cyan]╔══════════════════════════════════════════════════════════════╗[/bold cyan]
+[bold cyan]║[/bold cyan]  [bold yellow]☀️  [/bold yellow][bold white]W E A T H E R   D A S H B O A R D[/bold white][bold yellow]  🌧️[/bold yellow]   [bold cyan]║[/bold cyan]
+[bold cyan]║[/bold cyan]  [dim]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/dim]  [bold cyan]║[/bold cyan]
+[bold cyan]║[/bold cyan]  [italic]Your personal weather companion in the terminal[/italic]    [bold cyan]║[/bold cyan]
+[bold cyan]╚══════════════════════════════════════════════════════════════╝[/bold cyan]
+"""
+    console.print(banner)
+
 
 def show_main_menu() -> str:
     """Display the main menu and get user choice."""
     console.print()
     console.print(Panel(
-        "[bold cyan]🌤️  Weather Dashboard CLI[/bold cyan]\n\n"
-        "What would you like to do?\n\n"
-        "[1] 🌡️  Get current weather for a city\n"
-        "[2] 📅 Get 5-day forecast for a city\n"
-        "[3] ⭐ Manage favorite cities\n"
-        "[4] 🌍 Get weather for all favorites\n"
-        "[5] ❌ Exit\n",
-        title="[bold white]Main Menu[/bold white]",
+        "[bold yellow]☀️[/bold yellow] [bold cyan]Weather Dashboard[/bold cyan] [bold blue]🌧️[/bold blue]\n\n"
+        "[bold white]What would you like to do?[/bold white]\n\n"
+        "[bold green][1][/bold green] 🌡️  [white]Get current weather for a city[/white]\n"
+        "[bold green][2][/bold green] 📅 [white]Get 5-day forecast for a city[/white]\n"
+        "[bold green][3][/bold green] ⭐ [white]Manage favorite cities[/white]\n"
+        "[bold green][4][/bold green] 🌍 [white]Get weather for all favorites[/white]\n"
+        "[bold red][5][/bold red] ❌ [white]Exit[/white]\n",
+        title="[bold yellow]☀️[/bold yellow] [bold white]Main Menu[/bold white] [bold blue]🌧️[/bold blue]",
         border_style="cyan",
         box=box.ROUNDED,
     ))
@@ -60,11 +99,11 @@ def show_favorites_menu() -> str:
     console.print()
     console.print(Panel(
         "[bold magenta]⭐ Favorites Management[/bold magenta]\n\n"
-        "[1] 📋 List all favorite cities\n"
-        "[2] ➕ Add a city to favorites\n"
-        "[3] ➖ Remove a city from favorites\n"
-        "[4] 🔙 Back to main menu\n",
-        title="[bold white]Favorites Menu[/bold white]",
+        "[bold green][1][/bold green] 📋 [white]List all favorite cities[/white]\n"
+        "[bold green][2][/bold green] ➕ [white]Add a city to favorites[/white]\n"
+        "[bold green][3][/bold green] ➖ [white]Remove a city from favorites[/white]\n"
+        "[bold yellow][4][/bold yellow] 🔙 [white]Back to main menu[/white]\n",
+        title="[bold magenta]⭐[/bold magenta] [bold white]Favorites Menu[/bold white] [bold magenta]⭐[/bold magenta]",
         border_style="magenta",
         box=box.ROUNDED,
     ))
@@ -84,22 +123,21 @@ def interactive_mode() -> int:
     Returns:
         Exit code (0 for success)
     """
-    console.print("\n[bold cyan]Welcome to Weather Dashboard![/bold cyan]")
-    console.print("[dim]Your personal weather companion in the terminal.[/dim]\n")
+    show_welcome_banner()
     
     while True:
         choice = show_main_menu()
         
         if choice == "1":
             # Get current weather
-            city = Prompt.ask("\n[bold green]Enter city name[/bold green]", default="London")
+            city = Prompt.ask("\n[bold cyan]🏙️  Enter city name[/bold cyan]", default="London")
             console.print()
             display_current_weather(city)
             
             # Offer to save as favorite
-            if Confirm.ask("\n[yellow]Add this city to favorites?[/yellow]", default=False):
+            if Confirm.ask("\n[yellow]⭐ Add this city to favorites?[/yellow]", default=False):
                 if save_favorite(city):
-                    console.print(f"[green]✓[/green] Added '{city}' to favorites!")
+                    console.print(f"[bold green]✓[/bold green] Added '[cyan]{city}[/cyan]' to favorites!")
                 else:
                     console.print(f"[yellow]'{city}' is already in favorites.[/yellow]")
         
@@ -119,25 +157,25 @@ def interactive_mode() -> int:
                     display_favorites()
                 
                 elif fav_choice == "2":
-                    city = Prompt.ask("\n[bold green]Enter city name to add[/bold green]")
+                    city = Prompt.ask("\n[bold cyan]🏙️  Enter city name to add[/bold cyan]")
                     if save_favorite(city):
-                        console.print(f"[green]✓[/green] Added '{city}' to favorites!")
+                        console.print(f"[bold green]✓[/bold green] Added '[cyan]{city}[/cyan]' to favorites!")
                     else:
-                        console.print(f"[yellow]'{city}' is already in favorites.[/yellow]")
+                        console.print(f"[yellow]⚠️  '{city}' is already in favorites.[/yellow]")
                 
                 elif fav_choice == "3":
                     favorites = load_favorites()
                     if not favorites:
-                        console.print("[yellow]No favorites to remove.[/yellow]")
+                        console.print("[yellow]⚠️  No favorites to remove.[/yellow]")
                     else:
-                        console.print("\n[bold]Your favorites:[/bold]")
+                        console.print("\n[bold magenta]⭐ Your favorites:[/bold magenta]")
                         for i, fav in enumerate(favorites, 1):
-                            console.print(f"  {i}. {fav}")
-                        city = Prompt.ask("\n[bold red]Enter city name to remove[/bold red]")
+                            console.print(f"  [cyan]{i}.[/cyan] {fav}")
+                        city = Prompt.ask("\n[bold red]🗑️  Enter city name to remove[/bold red]")
                         if remove_favorite(city):
-                            console.print(f"[green]✓[/green] Removed '{city}' from favorites.")
+                            console.print(f"[bold green]✓[/bold green] Removed '[cyan]{city}[/cyan]' from favorites.")
                         else:
-                            console.print(f"[red]'{city}' was not in favorites.[/red]")
+                            console.print(f"[bold red]✗[/bold red] '{city}' was not in favorites.")
                 
                 elif fav_choice == "4":
                     break  # Back to main menu
@@ -149,7 +187,8 @@ def interactive_mode() -> int:
         
         elif choice == "5":
             # Exit
-            console.print("\n[bold cyan]Thanks for using Weather Dashboard! Stay dry! ☔[/bold cyan]\n")
+            console.print("\n[bold cyan]☀️  Thanks for using Weather Dashboard! Stay dry! ☔[/bold cyan]")
+            console.print("[dim]Clear skies ahead! 🌤️[/dim]\n")
             return 0
         
         # Pause before showing menu again
@@ -172,7 +211,7 @@ def display_current_weather(city: str) -> bool:
     weather_data = get_current_weather(city)
     
     if weather_data is None:
-        console.print(f"[bold red]Error:[/bold red] Could not fetch weather for '{city}'")
+        console.print(f"[bold red]❌ Error:[/bold red] Could not fetch weather for '[cyan]{city}[/cyan]'")
         return False
     
     # Extract weather information
@@ -188,11 +227,21 @@ def display_current_weather(city: str) -> bool:
     weather_id = weather_data["weather"][0]["id"]
     emoji = get_weather_emoji(weather_id)
     
+    # Determine temperature color based on value
+    if temp >= 30:
+        temp_color = "bold red"
+    elif temp >= 20:
+        temp_color = "bold yellow"
+    elif temp >= 10:
+        temp_color = "bold green"
+    else:
+        temp_color = "bold cyan"
+    
     # Create a beautiful panel with weather info
     weather_info = f"""
 {emoji} [bold cyan]{description}[/bold cyan]
 
-🌡️  Temperature: [bold yellow]{format_temperature(temp)}[/bold yellow]
+🌡️  Temperature: [{temp_color}]{format_temperature(temp)}[/{temp_color}]
 🤔 Feels Like:  [yellow]{format_temperature(feels_like)}[/yellow]
 💧 Humidity:    [blue]{humidity}%[/blue]
 💨 Wind Speed:  [green]{wind_speed} m/s[/green]
@@ -222,7 +271,7 @@ def display_forecast(city: str) -> bool:
     forecast_data = get_forecast(city)
     
     if forecast_data is None:
-        console.print(f"[bold red]Error:[/bold red] Could not fetch forecast for '{city}'")
+        console.print(f"[bold red]❌ Error:[/bold red] Could not fetch forecast for '[cyan]{city}[/cyan]'")
         return False
     
     city_name = forecast_data["city"]["name"]
@@ -233,14 +282,16 @@ def display_forecast(city: str) -> bool:
         title=f"📅 5-Day Forecast for {city_name}, {country}",
         box=box.ROUNDED,
         header_style="bold cyan",
+        title_style="bold white",
+        border_style="blue",
     )
     
-    table.add_column("Date/Time", style="white")
-    table.add_column("Temp", style="yellow")
-    table.add_column("Feels Like", style="yellow")
-    table.add_column("Conditions", style="cyan")
-    table.add_column("Humidity", style="blue")
-    table.add_column("Wind", style="green")
+    table.add_column("📆 Date/Time", style="white", header_style="bold white")
+    table.add_column("🌡️ Temp", style="yellow", header_style="bold yellow")
+    table.add_column("🤔 Feels Like", style="yellow", header_style="bold yellow")
+    table.add_column("☁️ Conditions", style="cyan", header_style="bold cyan")
+    table.add_column("💧 Humidity", style="blue", header_style="bold blue")
+    table.add_column("💨 Wind", style="green", header_style="bold green")
     
     # Get forecast entries (every 8th entry for daily forecast, or show all for detailed)
     forecast_list = forecast_data["list"]
@@ -270,18 +321,20 @@ def display_favorites() -> None:
     favorites = load_favorites()
     
     if not favorites:
-        console.print("[yellow]No favorite cities saved yet.[/yellow]")
-        console.print("Use [cyan]--add-favorite <city>[/cyan] to add one!")
+        console.print("[yellow]⚠️  No favorite cities saved yet.[/yellow]")
+        console.print("Use [cyan]--add-favorite <city>[/cyan] or [cyan]-a <city>[/cyan] to add one!")
         return
     
     table = Table(
         title="⭐ Favorite Cities",
         box=box.ROUNDED,
         header_style="bold magenta",
+        title_style="bold white",
+        border_style="magenta",
     )
     
-    table.add_column("#", style="dim")
-    table.add_column("City", style="cyan")
+    table.add_column("#", style="dim cyan")
+    table.add_column("🏙️  City", style="bold white")
     
     for i, city in enumerate(favorites, 1):
         table.add_row(str(i), city)
@@ -294,10 +347,10 @@ def weather_for_favorites() -> None:
     favorites = load_favorites()
     
     if not favorites:
-        console.print("[yellow]No favorite cities saved yet.[/yellow]")
+        console.print("[yellow]⚠️  No favorite cities saved yet.[/yellow]")
         return
     
-    console.print("[bold magenta]Weather for your favorite cities:[/bold magenta]\n")
+    console.print("[bold magenta]⭐ Weather for your favorite cities:[/bold magenta]\n")
     
     for city in favorites:
         display_current_weather(city)
