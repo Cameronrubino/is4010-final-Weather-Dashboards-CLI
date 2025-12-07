@@ -8,6 +8,7 @@ using the OpenWeatherMap API.
 import argparse
 import sys
 import os
+from datetime import datetime
 
 # Add the src directory to the path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -286,7 +287,7 @@ def display_forecast(city: str) -> bool:
         border_style="blue",
     )
     
-    table.add_column("📆 Date/Time", style="white", header_style="bold white")
+    table.add_column("📆 Day", style="white", header_style="bold white")
     table.add_column("🌡️ Temp", style="yellow", header_style="bold yellow")
     table.add_column("🤔 Feels Like", style="yellow", header_style="bold yellow")
     table.add_column("☁️ Conditions", style="cyan", header_style="bold cyan")
@@ -300,7 +301,11 @@ def display_forecast(city: str) -> bool:
     for i in range(0, min(40, len(forecast_list)), 8):
         entry = forecast_list[i]
         
+        # Parse and format date/time to be more readable
         dt_txt = entry["dt_txt"]
+        dt_obj = datetime.strptime(dt_txt, "%Y-%m-%d %H:%M:%S")
+        formatted_date = dt_obj.strftime("%a, %b %d")  # e.g., "Mon, Dec 09"
+        
         temp = format_temperature(entry["main"]["temp"])
         feels_like = format_temperature(entry["main"]["feels_like"])
         description = entry["weather"][0]["description"].title()
@@ -310,7 +315,7 @@ def display_forecast(city: str) -> bool:
         weather_id = entry["weather"][0]["id"]
         emoji = get_weather_emoji(weather_id)
         
-        table.add_row(dt_txt, temp, feels_like, f"{emoji} {description}", humidity, wind)
+        table.add_row(formatted_date, temp, feels_like, f"{emoji} {description}", humidity, wind)
     
     console.print(table)
     return True
