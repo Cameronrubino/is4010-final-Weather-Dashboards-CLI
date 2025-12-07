@@ -59,7 +59,7 @@ def get_current_weather(city: str) -> Optional[dict]:
     params = {
         "q": city,
         "appid": api_key,
-        "units": "metric",  # Use Celsius by default
+        "units": "imperial",  # Use Fahrenheit for US users
     }
     
     try:
@@ -101,7 +101,7 @@ def get_forecast(city: str) -> Optional[dict]:
     params = {
         "q": city,
         "appid": api_key,
-        "units": "metric",
+        "units": "imperial",  # Use Fahrenheit for US users
     }
     
     try:
@@ -209,12 +209,12 @@ def format_temperature(temp: float) -> str:
     Format temperature value for display.
     
     Args:
-        temp: Temperature in Celsius
+        temp: Temperature in Fahrenheit
         
     Returns:
         Formatted temperature string with unit
     """
-    return f"{temp:.1f}°C"
+    return f"{temp:.1f}°F"
 
 
 def celsius_to_fahrenheit(celsius: float) -> float:

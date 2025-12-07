@@ -37,23 +37,23 @@ class TestTemperatureFormatting:
 
     def test_format_temperature_positive(self):
         """Test formatting positive temperature."""
-        result = format_temperature(25.5)
-        assert result == "25.5°C"
+        result = format_temperature(77.9)
+        assert result == "77.9°F"
 
     def test_format_temperature_negative(self):
         """Test formatting negative temperature."""
         result = format_temperature(-10.3)
-        assert result == "-10.3°C"
+        assert result == "-10.3°F"
 
     def test_format_temperature_zero(self):
         """Test formatting zero temperature."""
         result = format_temperature(0.0)
-        assert result == "0.0°C"
+        assert result == "0.0°F"
 
     def test_format_temperature_rounding(self):
         """Test that temperature is rounded to 1 decimal place."""
-        result = format_temperature(23.456)
-        assert result == "23.5°C"
+        result = format_temperature(74.456)
+        assert result == "74.5°F"
 
 
 class TestTemperatureConversion:

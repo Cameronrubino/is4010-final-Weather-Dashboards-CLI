@@ -227,14 +227,14 @@ def display_current_weather(city: str) -> bool:
     weather_id = weather_data["weather"][0]["id"]
     emoji = get_weather_emoji(weather_id)
     
-    # Determine temperature color based on value
-    if temp >= 30:
+    # Determine temperature color based on value (Fahrenheit thresholds)
+    if temp >= 86:  # Hot (86°F+)
         temp_color = "bold red"
-    elif temp >= 20:
+    elif temp >= 68:  # Warm (68°F+)
         temp_color = "bold yellow"
-    elif temp >= 10:
+    elif temp >= 50:  # Mild (50°F+)
         temp_color = "bold green"
-    else:
+    else:  # Cold
         temp_color = "bold cyan"
     
     # Create a beautiful panel with weather info
@@ -244,7 +244,7 @@ def display_current_weather(city: str) -> bool:
 🌡️  Temperature: [{temp_color}]{format_temperature(temp)}[/{temp_color}]
 🤔 Feels Like:  [yellow]{format_temperature(feels_like)}[/yellow]
 💧 Humidity:    [blue]{humidity}%[/blue]
-💨 Wind Speed:  [green]{wind_speed} m/s[/green]
+💨 Wind Speed:  [green]{wind_speed} mph[/green]
 """
     
     panel = Panel(
@@ -305,7 +305,7 @@ def display_forecast(city: str) -> bool:
         feels_like = format_temperature(entry["main"]["feels_like"])
         description = entry["weather"][0]["description"].title()
         humidity = f"{entry['main']['humidity']}%"
-        wind = f"{entry['wind']['speed']} m/s"
+        wind = f"{entry['wind']['speed']} mph"
         
         weather_id = entry["weather"][0]["id"]
         emoji = get_weather_emoji(weather_id)
